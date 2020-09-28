@@ -1,7 +1,8 @@
 package ch.unifr.digits.webprotege.attestation.contract;
 
-import ch.unifr.digits.gwt.web3.js.Web3;
-import ch.unifr.digits.gwt.web3.js.core.TransactionReceipt;
+
+import ch.unifr.digits.webprotege.attestation.web3.Web3;
+import ch.unifr.digits.webprotege.attestation.web3.core.TransactionReceipt;
 import elemental2.promise.Promise;
 import jsinterop.annotations.JsMethod;
 import jsinterop.annotations.JsPackage;

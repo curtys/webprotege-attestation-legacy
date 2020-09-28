@@ -1,13 +1,13 @@
 package ch.unifr.digits.webprotege.attestation;
 
-import ch.unifr.digits.gwt.web3.js.Web3;
 
-import ch.unifr.digits.gwt.web3.js.core.TransactionReceipt;
 import ch.unifr.digits.webprotege.attestation.contract.OntologyContract;
 import ch.unifr.digits.webprotege.attestation.contract.VerifyContractReturn;
 import ch.unifr.digits.webprotege.attestation.contract.VerifyResult;
 import ch.unifr.digits.webprotege.attestation.ethereum.Connection;
 import ch.unifr.digits.webprotege.attestation.ethereum.EthereumProvider;
+import ch.unifr.digits.webprotege.attestation.web3.Web3;
+import ch.unifr.digits.webprotege.attestation.web3.core.TransactionReceipt;
 import com.google.gwt.core.client.Callback;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.JsonUtils;

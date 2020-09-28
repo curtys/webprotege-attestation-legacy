@@ -1,6 +1,6 @@
 package ch.unifr.digits.webprotege.attestation.ethereum;
 
-import ch.unifr.digits.gwt.web3.js.core.Provider;
+import ch.unifr.digits.webprotege.attestation.web3.core.Provider;
 import elemental2.promise.Promise;
 import jsinterop.annotations.JsMethod;
 import jsinterop.annotations.JsPackage;

@@ -1,6 +1,7 @@
 package ch.unifr.digits.webprotege.attestation.ethereum;
 
-import ch.unifr.digits.gwt.web3.js.Web3;
+
+import ch.unifr.digits.webprotege.attestation.web3.Web3;
 
 public class Connection {
     private EthereumProvider provider;
