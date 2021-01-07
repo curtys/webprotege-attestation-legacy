@@ -33,13 +33,13 @@ public class VerifyResult implements Result {
         return timestamp;
     }
 
-//    @Override
-//    public String toString() {
-//        return "VerifyResult{" +
-//                "valid=" + valid +
-//                ", signer='" + signer + '\'' +
-//                ", signerName='" + signerName + '\'' +
-//                ", timestamp=" + timestamp +
-//                '}';
-//    }
+    @Override
+    public String toString() {
+        return "VerifyResult{" +
+                "valid=" + valid +
+                ", signer='" + signer + '\'' +
+                ", signerName='" + signerName + '\'' +
+                ", timestamp=" + timestamp +
+                '}';
+    }
 }

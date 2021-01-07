@@ -6,8 +6,8 @@ networks:
 
 services:
   ganache:
-    image: trufflesuite/ganache-cli:v6.9.1
+    image: trufflesuite/ganache-cli:latest
     ports:
       - '8545:8545'
-    command: ganache-cli -s attestation
+    command: ganache-cli -s attestation -l 100000000000
 # mnemonic: endorse soccer immense wonder cheap crew hundred protect bunker lemon burden wash

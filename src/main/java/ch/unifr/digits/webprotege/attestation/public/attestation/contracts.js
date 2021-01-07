@@ -1,13 +1,13 @@
-function FileAttestationContract(web3, jsonInterface, address) {
+function OntologyAttestationContract(web3, jsonInterface, address) {
     this.delegate = new web3.eth.Contract(jsonInterface, address);
-    this.verify = function(from, id, hash) {
-        return this.delegate.methods.verify(id, hash).call({from: from});
+    this.verify = function(from, ontologyIri, versionIri, hash) {
+        return this.delegate.methods.verify(ontologyIri, versionIri, hash).call({from: from});
     }
-    this.attest = function(from, id, name, hash) {
-        return this.delegate.methods.attest(id, name, hash).send({from: from});
+    this.attest = function(from, ontologyIri, versionIri, name, hash) {
+        return this.delegate.methods.attest(ontologyIri, versionIri, name, hash).send({from: from});
     }
 }
-function OntologyAttestationContract(web3, jsonInterface, address) {
+function ChangeTrackingContract(web3, jsonInterface, address) {
     this.delegate = new web3.eth.Contract(jsonInterface, address);
     this.verifyEntity = function(from, ontologyIri, versionIri, entityHash) {
         return this.delegate.methods.verifyEntity(ontologyIri, versionIri, entityHash).call({from: from});

@@ -38,8 +38,6 @@ public class OntologyAttestation extends Contract {
 
     public static final String FUNC_VERIFY = "verify";
 
-    public static final String FUNC_VERIFYENTITY = "verifyEntity";
-
     @Deprecated
     protected OntologyAttestation(String contractAddress, Web3j web3j, Credentials credentials, BigInteger gasPrice, BigInteger gasLimit) {
         super(BINARY, contractAddress, web3j, credentials, gasPrice, gasLimit);
@@ -58,45 +56,22 @@ public class OntologyAttestation extends Contract {
         super(BINARY, contractAddress, web3j, transactionManager, contractGasProvider);
     }
 
-    public RemoteFunctionCall<TransactionReceipt> attest(String ontologyIri, String versionIri, String name, BigInteger hash, List<BigInteger> classHashes) {
+    public RemoteFunctionCall<TransactionReceipt> attest(String ontologyIri, String versionIri, String name, String hash) {
         final Function function = new Function(
                 FUNC_ATTEST, 
-                Arrays.<Type>asList(new Utf8String(ontologyIri),
-                new Utf8String(versionIri),
-                new Utf8String(name),
-                new org.web3j.abi.datatypes.generated.Int256(hash), 
-                new org.web3j.abi.datatypes.DynamicArray<org.web3j.abi.datatypes.generated.Int256>(
-                        org.web3j.abi.datatypes.generated.Int256.class,
-                        org.web3j.abi.Utils.typeMap(classHashes, org.web3j.abi.datatypes.generated.Int256.class))), 
+                Arrays.<Type>asList(new org.web3j.abi.datatypes.Utf8String(ontologyIri), 
+                new org.web3j.abi.datatypes.Utf8String(versionIri), 
+                new org.web3j.abi.datatypes.Utf8String(name), 
+                new org.web3j.abi.datatypes.Utf8String(hash)), 
                 Collections.<TypeReference<?>>emptyList());
         return executeRemoteCallTransaction(function);
     }
 
-    public RemoteFunctionCall<Tuple4<Boolean, String, String, BigInteger>> verify(String ontologyIri, String versionIri, BigInteger hash) {
+    public RemoteFunctionCall<Tuple4<Boolean, String, String, BigInteger>> verify(String ontologyIri, String versionIri, String hash) {
         final Function function = new Function(FUNC_VERIFY, 
-                Arrays.<Type>asList(new Utf8String(ontologyIri),
-                new Utf8String(versionIri),
-                new org.web3j.abi.datatypes.generated.Int256(hash)), 
-                Arrays.<TypeReference<?>>asList(new TypeReference<Bool>() {}, new TypeReference<Address>() {}, new TypeReference<Utf8String>() {}, new TypeReference<Uint256>() {}));
-        return new RemoteFunctionCall<Tuple4<Boolean, String, String, BigInteger>>(function,
-                new Callable<Tuple4<Boolean, String, String, BigInteger>>() {
-                    @Override
-                    public Tuple4<Boolean, String, String, BigInteger> call() throws Exception {
-                        List<Type> results = executeCallMultipleValueReturn(function);
-                        return new Tuple4<Boolean, String, String, BigInteger>(
-                                (Boolean) results.get(0).getValue(), 
-                                (String) results.get(1).getValue(), 
-                                (String) results.get(2).getValue(), 
-                                (BigInteger) results.get(3).getValue());
-                    }
-                });
-    }
-
-    public RemoteFunctionCall<Tuple4<Boolean, String, String, BigInteger>> verifyEntity(String ontologyIri, String versionIri, BigInteger entityHash) {
-        final Function function = new Function(FUNC_VERIFYENTITY, 
-                Arrays.<Type>asList(new Utf8String(ontologyIri),
-                new Utf8String(versionIri),
-                new org.web3j.abi.datatypes.generated.Int256(entityHash)), 
+                Arrays.<Type>asList(new org.web3j.abi.datatypes.Utf8String(ontologyIri), 
+                new org.web3j.abi.datatypes.Utf8String(versionIri), 
+                new org.web3j.abi.datatypes.Utf8String(hash)), 
                 Arrays.<TypeReference<?>>asList(new TypeReference<Bool>() {}, new TypeReference<Address>() {}, new TypeReference<Utf8String>() {}, new TypeReference<Uint256>() {}));
         return new RemoteFunctionCall<Tuple4<Boolean, String, String, BigInteger>>(function,
                 new Callable<Tuple4<Boolean, String, String, BigInteger>>() {

@@ -4,18 +4,18 @@ import edu.stanford.bmir.protege.web.shared.dispatch.Result;
 
 public class GetAttestationSettingsActionResult implements Result {
 
-    private String addressFileContract;
+    private String addressChangeContract;
     private String addressOntologyContract;
 
     public GetAttestationSettingsActionResult() {}
 
-    public GetAttestationSettingsActionResult(String addressFileContract, String addressOntologyContract) {
-        this.addressFileContract = addressFileContract;
+    public GetAttestationSettingsActionResult(String addressChangeContract, String addressOntologyContract) {
+        this.addressChangeContract = addressChangeContract;
         this.addressOntologyContract = addressOntologyContract;
     }
 
-    public String getAddressFileContract() {
-        return addressFileContract;
+    public String getAddressChangeContract() {
+        return addressChangeContract;
     }
 
     public String getAddressOntologyContract() {

@@ -8,16 +8,21 @@ import jsinterop.annotations.JsMethod;
 import jsinterop.annotations.JsPackage;
 import jsinterop.annotations.JsType;
 
-@JsType(isNative = true, namespace = JsPackage.GLOBAL)
-public class OntologyAttestationContract {
+import java.util.List;
 
-    public OntologyAttestationContract(Web3 web3, Object jsonInterface, String address) {}
+@JsType(isNative = true, namespace = JsPackage.GLOBAL)
+public class ChangeTrackingContract {
+
+    public ChangeTrackingContract(Web3 web3, Object jsonInterface, String address) {}
+
+    @JsMethod
+    public native Promise<VerifyContractReturn> verifyEntity(String from, String id, int entityHash);
 
     @JsMethod
     public native Promise<VerifyContractReturn> verify(String from, String ontologyIri, String versionIri, String hash);
 
     @JsMethod
     public native Promise<TransactionReceipt> attest(String from, String ontologyIri, String versionIri, String name,
-                                                     String hash);
+                                                     String hash, List<Integer> classHashes);
 
 }

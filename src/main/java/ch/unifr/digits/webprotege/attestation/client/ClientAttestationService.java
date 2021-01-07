@@ -1,7 +1,7 @@
 package ch.unifr.digits.webprotege.attestation.client;
 
 
-import ch.unifr.digits.webprotege.attestation.client.contract.FileAttestationContract;
+import ch.unifr.digits.webprotege.attestation.client.contract.ChangeTrackingContract;
 import ch.unifr.digits.webprotege.attestation.client.contract.OntologyAttestationContract;
 import ch.unifr.digits.webprotege.attestation.client.contract.VerifyContractReturn;
 import ch.unifr.digits.webprotege.attestation.client.ethereum.Connection;
@@ -9,7 +9,9 @@ import ch.unifr.digits.webprotege.attestation.client.ethereum.EthereumProvider;
 import ch.unifr.digits.webprotege.attestation.client.web3.Web3;
 import ch.unifr.digits.webprotege.attestation.client.web3.core.TransactionReceipt;
 import ch.unifr.digits.webprotege.attestation.shared.VerifyResult;
-import com.google.gwt.core.client.*;
+import com.google.gwt.core.client.Callback;
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.core.client.JsonUtils;
 import com.google.gwt.http.client.*;
 import edu.stanford.bmir.protege.web.shared.download.DownloadFormatExtension;
 import edu.stanford.bmir.protege.web.shared.project.ProjectId;
@@ -23,7 +25,6 @@ import java.util.List;
 
 public class ClientAttestationService {
 
-    private static final String CONTRACT_FILE_NAME = "FileAttestation";
     private static final String CONTRACT_ONTOLOGY_NAME = "OntologyAttestation";
 
     public static void signProjectFile(ProjectId projectId, RevisionNumber revisionNumber, String ontologyIRI,
@@ -45,30 +46,10 @@ public class ClientAttestationService {
             return Promise.resolve(hash);
         });
 
-        Promise<Connection> connectionPromise = connectToChain();
-        Promise<Object> interfacePromise = getContractInterface(CONTRACT_FILE_NAME);
-
-        Promise.all(hashPromise, connectionPromise, interfacePromise).then((args) -> {
-            String hash = String.valueOf(args[0]);
-            Connection connection = (Connection) args[1];
-            Object contractInterface = args[2];
-
-            String id = ontologyIRI+versionIRI;
-            FileAttestationContract contract = new FileAttestationContract(connection.getWeb3(), contractInterface, address);
-            Promise<TransactionReceipt> attestPromise = contract.attest(connection.getProvider().selectedAddress,
-                    id, name, hash);
-            attestPromise.then(receipt -> {
-                GWT.log("[attestation] transaction result: " + receipt.status);
-                callback.onSuccess(receipt.status);
-                return null;
-            }).catch_(error -> {
-                callback.onFailure(error);
-                return null;
-            });
-
+        hashPromise.then((hash) -> {
+            signOntology(ontologyIRI, versionIRI, name, address, hash, callback);
             return null;
         });
-
     }
 
     public static void verifyProjectFile(ProjectId projectId, RevisionNumber revisionNumber, String ontologyIRI,
@@ -90,18 +71,49 @@ public class ClientAttestationService {
             return Promise.resolve(hash);
         });
 
+        hashPromise.then((hash) -> {
+            verifyOntology(ontologyIRI, versionIRI, address, hash, callback);
+            return null;
+        });
+    }
+
+    public static void signOntology(String ontologyIRI, String versionIRI, String name, String address, String hash,
+                                    Callback<Boolean, Object> callback) {
         Promise<Connection> connectionPromise = connectToChain();
-        Promise<Object> interfacePromise = getContractInterface(CONTRACT_FILE_NAME);
+        Promise<Object> interfacePromise = getContractInterface(CONTRACT_ONTOLOGY_NAME);
+        Promise.all(connectionPromise, interfacePromise).then((args) -> {
+            Connection connection = (Connection) args[0];
+            Object contractInterface = args[1];
 
-        Promise.all(hashPromise, connectionPromise, interfacePromise).then((args) -> {
-            String hash = String.valueOf(args[0]);
-            Connection connection = (Connection) args[1];
-            Object contractInterface = args[2];
+            OntologyAttestationContract contract = new OntologyAttestationContract(connection.getWeb3(), contractInterface, address);
+            Promise<TransactionReceipt> attestPromise = contract.attest(connection.getProvider().selectedAddress,
+                    ontologyIRI, versionIRI, name, hash);
+            attestPromise.then(receipt -> {
+                GWT.log("[attestation] transaction result: " + receipt.status);
+                callback.onSuccess(receipt.status);
+                return null;
+            }).catch_(error -> {
+                callback.onFailure(error);
+                return null;
+            });
 
-            String id = ontologyIRI+versionIRI;
-            FileAttestationContract contract = new FileAttestationContract(connection.getWeb3(), contractInterface, address);
+            return null;
+        });
+    }
+
+    public static void verifyOntology(String ontologyIRI, String versionIRI, String address, String hash,
+                                      Callback<VerifyResult, Object> callback) {
+
+        Promise<Connection> connectionPromise = connectToChain();
+        Promise<Object> interfacePromise = getContractInterface(CONTRACT_ONTOLOGY_NAME);
+
+        Promise.all(connectionPromise, interfacePromise).then((args) -> {
+            Connection connection = (Connection) args[0];
+            Object contractInterface = args[1];
+
+            OntologyAttestationContract contract = new OntologyAttestationContract(connection.getWeb3(), contractInterface, address);
             Promise<VerifyContractReturn> resultPromise = contract.verify(connection.getProvider().selectedAddress,
-                    id, hash);
+                    ontologyIRI, versionIRI, hash);
             resultPromise.then(contractReturn -> {
                 VerifyResult result = new VerifyResult(contractReturn.valid, contractReturn.signer,
                         contractReturn.signerName, contractReturn.timestamp);
@@ -117,7 +129,7 @@ public class ClientAttestationService {
 
     }
 
-    public static void signOntology(String ontologyIRI, String versionIRI, String name, String address, int hash,
+    public static void signChangeTracking(String ontologyIRI, String versionIRI, String name, String address, String hash,
                                     List<Integer> classHashes, Callback<Boolean, Object> callback) {
         Promise<Connection> connectionPromise = connectToChain();
         Promise<Object> interfacePromise = getContractInterface(CONTRACT_ONTOLOGY_NAME);
@@ -125,7 +137,7 @@ public class ClientAttestationService {
             Connection connection = (Connection) args[0];
             Object contractInterface = args[1];
 
-            OntologyAttestationContract contract = new OntologyAttestationContract(connection.getWeb3(), contractInterface, address);
+            ChangeTrackingContract contract = new ChangeTrackingContract(connection.getWeb3(), contractInterface, address);
             Promise<TransactionReceipt> attestPromise = contract.attest(connection.getProvider().selectedAddress,
                     ontologyIRI, versionIRI, name, hash, classHashes);
             attestPromise.then(receipt -> {
@@ -141,7 +153,7 @@ public class ClientAttestationService {
         });
     }
 
-    public static void verifyOntology(String ontologyIRI, String versionIRI, String address, int hash,
+    public static void verifyChangeTracking(String ontologyIRI, String versionIRI, String address, String hash,
                                       Callback<VerifyResult, Object> callback) {
 
         Promise<Connection> connectionPromise = connectToChain();
@@ -151,7 +163,7 @@ public class ClientAttestationService {
             Connection connection = (Connection) args[0];
             Object contractInterface = args[1];
 
-            OntologyAttestationContract contract = new OntologyAttestationContract(connection.getWeb3(), contractInterface, address);
+            ChangeTrackingContract contract = new ChangeTrackingContract(connection.getWeb3(), contractInterface, address);
             Promise<VerifyContractReturn> resultPromise = contract.verify(connection.getProvider().selectedAddress,
                     ontologyIRI, versionIRI, hash);
             resultPromise.then(contractReturn -> {

@@ -76,6 +76,6 @@ public class VerifyAction implements ProjectAction<VerifyResult> {
 
     public enum Mode {
         ONTOLOGY,
-        FILE
+        ENTITY
     }
 }
