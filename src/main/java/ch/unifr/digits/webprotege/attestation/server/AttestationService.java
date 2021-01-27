@@ -5,6 +5,7 @@ import okhttp3.OkHttpClient;
 import org.web3j.crypto.Credentials;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.Web3jService;
+import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.web3j.protocol.http.HttpService;
 
 import java.util.concurrent.TimeUnit;
@@ -22,7 +23,7 @@ public abstract class AttestationService<T> {
     }
 
     public abstract String contractAddress();
-    public abstract void attest(String iri, String versionIri, String name, String hash, T params) throws Exception;
+    public abstract TransactionReceipt attest(String iri, String versionIri, String name, String hash, T params) throws Exception;
     public abstract VerifyResult verify(String iri, String versionIri, String hash, T params) throws Exception;
 
     private static void init() {

@@ -49,22 +49,22 @@ public class ChangeTrackingAttestationService extends OntologyAttestationService
     }
 
     @Override
-    public void attest(OWLOntology ontology, String name) throws Exception {
+    public TransactionReceipt attest(OWLOntology ontology, String name) throws Exception {
         String hash = ontologyHash(ontology);
         String ontologyIri = ontology.getOntologyID().getOntologyIRI().get().toString();
         String versionIri = ontology.getOntologyID().getVersionIRI().transform(IRI::toString).or("");
         List<BigInteger> classHashes = toBigInt(classHashes(ontology));
-        attest(ontologyIri, versionIri, name, hash, new EntitySet(classHashes));
+        return attest(ontologyIri, versionIri, name, hash, new EntitySet(classHashes));
     }
 
     @Override
-    public void attest(String iri, String versionIri, String name, String hash, EntitySet params) throws Exception {
+    public TransactionReceipt attest(String iri, String versionIri, String name, String hash, EntitySet params) throws Exception {
         ChangeTracking contract = ChangeTracking.load(contractAddress(), WEB3_REF.get(), CREDENTIALS,
                 DefaultGasProvider.GAS_PRICE, new BigInteger("1000000000"));
         RemoteFunctionCall<TransactionReceipt> call = contract.attest(iri, versionIri, name, hash,
                 params.hashes);
         TransactionReceipt transactionReceipt = call.send();
-        transactionReceipt.isStatusOK();
+        return transactionReceipt;
     }
 
     public List<BigInteger> toBigInt(List<Integer> ints) {

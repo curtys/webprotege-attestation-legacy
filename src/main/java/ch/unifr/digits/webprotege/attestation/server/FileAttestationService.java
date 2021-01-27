@@ -21,12 +21,12 @@ public class FileAttestationService<T> extends AttestationService<T> {
     }
 
     @Override
-    public void attest(String iri, String versionIri, String name, String hash, T params) throws Exception {
+    public TransactionReceipt attest(String iri, String versionIri, String name, String hash, T params) throws Exception {
         OntologyAttestation contract = OntologyAttestation.load(contractAddress(), WEB3_REF.get(), CREDENTIALS,
                 DefaultGasProvider.GAS_PRICE, DefaultGasProvider.GAS_LIMIT);
         RemoteFunctionCall<TransactionReceipt> call = contract.attest(iri, versionIri, name, hash);
         TransactionReceipt receipt = call.send();
-        receipt.isStatusOK();
+        return receipt;
     }
 
     @Override
