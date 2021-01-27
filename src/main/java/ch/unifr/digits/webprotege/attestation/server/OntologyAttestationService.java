@@ -18,8 +18,10 @@ public class OntologyAttestationService<T> extends FileAttestationService<T> {
     public String ontologyHash(OWLOntology ontology) {
         Set<OWLEntity> signature = ontology.getSignature();
         Set<OWLAxiom> axioms = ontology.getAxioms();
+        Set<OWLAnnotation> annotations = ontology.getAnnotations();
         Set<OWLObject> all = new HashSet<>();
         all.addAll(signature);
+        all.addAll(annotations);
         all.addAll(axioms);
         return String.valueOf(all.hashCode());
     }
