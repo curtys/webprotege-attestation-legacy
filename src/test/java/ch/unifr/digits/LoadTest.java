@@ -9,6 +9,7 @@ import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.owlxml.renderer.OWLXMLObjectRenderer;
 import org.semanticweb.owlapi.owlxml.renderer.OWLXMLWriter;
+import org.web3j.protocol.core.methods.response.TransactionReceipt;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -17,12 +18,13 @@ import java.io.StringWriter;
 import java.time.Duration;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Disabled
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class LoadTest {
 
-    private static final int NUM_RUNS = 0;
+    private static final int NUM_RUNS = 20;
     private static final String RESULTS_DIR = "results/";
     private static final Map<String, String> testOntologyFiles = new HashMap<>();
     private static final Map<String, OWLOntology> loadedOntologies = new HashMap<>();
@@ -33,8 +35,8 @@ public class LoadTest {
         testOntologyFiles.put("foodon", "ontologies/foodon.owl");
         testOntologyFiles.put("doid", "ontologies/doid.owl");
         testOntologyFiles.put("obi", "ontologies/obi.owl");
-//        testOntologyFiles.put("ncit", "ontologies/ncit-thesaurus.owl");
-        testOntologyFiles.put("dron", "ontologies/dron-full.owl");
+        testOntologyFiles.put("ncit", "ontologies/ncit-thesaurus.owl");
+//        testOntologyFiles.put("dron", "ontologies/dron-full.owl");
 //        serviceRunners.add(new Runner.FileAttest(new FileAttestationService(), measurements));
         serviceRunners.add(new Runner.OntologyAttest(new OntologyAttestationService(), measurements));
 //        serviceRunners.add(new Runner.ChangeTracking(new ChangeTrackingAttestationService(), measurements));
@@ -60,12 +62,18 @@ public class LoadTest {
                     runner.attest(entry.getKey(), entry.getValue());
                     runner.verify(entry.getKey(), entry.getValue());
                 }
-                saveMeasurementsSeries(RESULTS_DIR+runner.name()+"-attest.csv", entry.getKey(),
-                        measurements.getSeries(constructSeriesName(entry.getKey(), runner.name(), "attest")));
-                saveMeasurementsSeries(RESULTS_DIR+runner.name()+"-hash.csv", entry.getKey(),
-                        measurements.getSeries(constructSeriesName(entry.getKey(), runner.name(), "hash")));
-                saveMeasurementsSeries(RESULTS_DIR+runner.name()+"-verify.csv", entry.getKey(),
-                        measurements.getSeries(constructSeriesName(entry.getKey(), runner.name(), "verify")));
+//                saveMeasurementsSeries(RESULTS_DIR+runner.name()+"-attest.csv", entry.getKey(),
+//                        measurements.getSeries(constructSeriesName(entry.getKey(), runner.name(), "attest"))
+//                                .stream().map(Duration::toNanos).map(String::valueOf));
+//                saveMeasurementsSeries(RESULTS_DIR+runner.name()+"-hash.csv", entry.getKey(),
+//                        measurements.getSeries(constructSeriesName(entry.getKey(), runner.name(), "hash"))
+//                                .stream().map(Duration::toNanos).map(String::valueOf));
+//                saveMeasurementsSeries(RESULTS_DIR+runner.name()+"-verify.csv", entry.getKey(),
+//                        measurements.getSeries(constructSeriesName(entry.getKey(), runner.name(), "verify"))
+//                                .stream().map(Duration::toNanos).map(String::valueOf));
+                saveMeasurementsSeries(RESULTS_DIR+runner.name()+"-gas.csv", entry.getKey(),
+                        measurements.getManualSeries(constructSeriesName(entry.getKey(), runner.name(), "gas"))
+                                .stream().map(String::valueOf));
             }
         }
 
@@ -77,7 +85,7 @@ public class LoadTest {
         System.out.println("Mean: " + arimMean(series));
     }
 
-    private static void saveMeasurementsSeries(String fname, String id, List<Duration> series) throws Exception {
+    private static void saveMeasurementsSeries(String fname, String id, Stream<String> series) throws Exception {
         File file = new File(fname);
         String head = null;
         if (!file.exists()) {
@@ -86,7 +94,7 @@ public class LoadTest {
             for (int i = 1; i <= NUM_RUNS; i++) {
                 buffer.append("run_").append(i).append(",");
             }
-            buffer.append("mean");
+//            buffer.append("mean");
             head = buffer.toString();
         }
         FileWriter fileWriter = new FileWriter(file, true);
@@ -94,8 +102,8 @@ public class LoadTest {
         if (head != null) writer.println(head);
 
         String line = id+",";
-        line += series.stream().map(Duration::toNanos).map(String::valueOf).collect(Collectors.joining(","));
-        line += "," + arimMean(series);
+        line += series.collect(Collectors.joining(","));
+//        line += "," + arimMean(series);
         writer.println(line);
         writer.close();
     }
@@ -188,8 +196,10 @@ public class LoadTest {
                 System.out.println("attest " + name() + " " + iri + " " + versionIri + " " + ontologyHash);
 
                 ticket = measurements.begin();
-                service.attest(iri, versionIri,"John doe", String.valueOf(ontologyHash), null);
+                TransactionReceipt receipt = service.attest(iri, versionIri, "John doe", String.valueOf(ontologyHash), null);
                 measurements.finish(constructSeriesName(id, name(), "attest"), ticket);
+                measurements.manualMeasurement(constructSeriesName(id, name(), "gas"), receipt.getGasUsed().longValue());
+                System.out.println(receipt.getGasUsed());
             }
 
             @Override

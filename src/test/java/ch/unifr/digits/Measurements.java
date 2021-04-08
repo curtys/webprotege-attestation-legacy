@@ -10,6 +10,7 @@ public class Measurements {
 
     private final AtomicInteger counter = new AtomicInteger(0);
     private final Map<String, List<Duration>> series = new HashMap<>();
+    private final Map<String, List<Long>> manualSeries = new HashMap<>();
     private final Map<Integer, Instant> map = new HashMap<>();
 
     public int begin() {
@@ -31,9 +32,24 @@ public class Measurements {
         });
     }
 
+    public void manualMeasurement(String seriesName, Long value) {
+        manualSeries.compute(seriesName, (key, list) -> {
+            if (list == null) list = new ArrayList<>();
+            list.add(value);
+            return list;
+        });
+    }
+
     public List<Duration> getSeries(String seriesName) {
         List<Duration> values = series.get(seriesName);
         List<Duration> list = new ArrayList<>();
+        if (values == null) return list;
+        return Collections.unmodifiableList(values);
+    }
+
+    public List<Long> getManualSeries(String seriesName) {
+        List<Long> values = manualSeries.get(seriesName);
+        List<Long> list = new ArrayList<>();
         if (values == null) return list;
         return Collections.unmodifiableList(values);
     }
