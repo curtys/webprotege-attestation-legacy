@@ -1,6 +1,7 @@
 package ch.unifr.digits.webprotege.attestation.server;
 
 import org.semanticweb.owlapi.model.*;
+import org.semanticweb.owlapi.model.parameters.Imports;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 
 import java.util.HashSet;
@@ -17,7 +18,7 @@ public class OntologyAttestationService<T> extends FileAttestationService<T> {
     }
 
     public String ontologyHash(OWLOntology ontology) {
-        Set<OWLEntity> signature = ontology.getSignature();
+        Set<OWLEntity> signature = ontology.getSignature(Imports.INCLUDED);
         Set<OWLAxiom> axioms = ontology.getAxioms();
         Set<OWLAnnotation> annotations = ontology.getAnnotations();
         Set<OWLObject> all = new HashSet<>();

@@ -4,10 +4,13 @@ require('dotenv').config({ path: `.env` });
 
 const buildPath = `${__dirname}/../build/`;
 const contracts = ['OntologyAttestation', 'ChangeTracking'];
+const buildPathTesting = `${__dirname}/../build/testing/`;
+const contractsTesting = ['Storage'];
 
-function load(contractName) {
-    const abi = fs.readFileSync(`${buildPath}${contractName}.abi`, 'UTF-8');
-    const bin = fs.readFileSync(`${buildPath}${contractName}.bin`, 'UTF-8');
+
+function load(contractName, basePath = buildPath) {
+    const abi = fs.readFileSync(`${basePath}${contractName}.abi`, 'UTF-8');
+    const bin = fs.readFileSync(`${basePath}${contractName}.bin`, 'UTF-8');
     return { abi: JSON.parse(abi), bin: bin };
 }
 
@@ -38,6 +41,11 @@ console.log(`Using web3 account: ${account.address}`);
     for (const c of contracts) {
         console.log(`Deploying ${c} ...`);
         const compileOut = load(c);
+        await deploy(c, compileOut.abi, compileOut.bin);
+    }
+    for (const c of contractsTesting) {
+        console.log(`Deploying ${c} ...`);
+        const compileOut = load(c, buildPathTesting);
         await deploy(c, compileOut.abi, compileOut.bin);
     }
 })()

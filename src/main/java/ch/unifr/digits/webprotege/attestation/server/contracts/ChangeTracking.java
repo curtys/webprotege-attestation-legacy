@@ -60,23 +60,23 @@ public class ChangeTracking extends Contract {
 
     public RemoteFunctionCall<TransactionReceipt> attest(String ontologyIri, String versionIri, String name, String hash, List<BigInteger> classHashes) {
         final Function function = new Function(
-                FUNC_ATTEST,
-                Arrays.<Type>asList(new org.web3j.abi.datatypes.Utf8String(ontologyIri),
-                        new org.web3j.abi.datatypes.Utf8String(versionIri),
-                        new org.web3j.abi.datatypes.Utf8String(name),
-                        new org.web3j.abi.datatypes.Utf8String(hash),
-                        new org.web3j.abi.datatypes.DynamicArray<org.web3j.abi.datatypes.generated.Int256>(
-                                org.web3j.abi.datatypes.generated.Int256.class,
-                                org.web3j.abi.Utils.typeMap(classHashes, org.web3j.abi.datatypes.generated.Int256.class))),
+                FUNC_ATTEST, 
+                Arrays.<Type>asList(new org.web3j.abi.datatypes.Utf8String(ontologyIri), 
+                new org.web3j.abi.datatypes.Utf8String(versionIri), 
+                new org.web3j.abi.datatypes.Utf8String(name), 
+                new org.web3j.abi.datatypes.Utf8String(hash), 
+                new org.web3j.abi.datatypes.DynamicArray<org.web3j.abi.datatypes.generated.Int256>(
+                        org.web3j.abi.datatypes.generated.Int256.class,
+                        org.web3j.abi.Utils.typeMap(classHashes, org.web3j.abi.datatypes.generated.Int256.class))), 
                 Collections.<TypeReference<?>>emptyList());
         return executeRemoteCallTransaction(function);
     }
 
     public RemoteFunctionCall<Tuple4<Boolean, String, String, BigInteger>> verify(String ontologyIri, String versionIri, String hash) {
-        final Function function = new Function(FUNC_VERIFY,
-                Arrays.<Type>asList(new org.web3j.abi.datatypes.Utf8String(ontologyIri),
-                        new org.web3j.abi.datatypes.Utf8String(versionIri),
-                        new org.web3j.abi.datatypes.Utf8String(hash)),
+        final Function function = new Function(FUNC_VERIFY, 
+                Arrays.<Type>asList(new org.web3j.abi.datatypes.Utf8String(ontologyIri), 
+                new org.web3j.abi.datatypes.Utf8String(versionIri), 
+                new org.web3j.abi.datatypes.Utf8String(hash)), 
                 Arrays.<TypeReference<?>>asList(new TypeReference<Bool>() {}, new TypeReference<Address>() {}, new TypeReference<Utf8String>() {}, new TypeReference<Uint256>() {}));
         return new RemoteFunctionCall<Tuple4<Boolean, String, String, BigInteger>>(function,
                 new Callable<Tuple4<Boolean, String, String, BigInteger>>() {
@@ -84,19 +84,19 @@ public class ChangeTracking extends Contract {
                     public Tuple4<Boolean, String, String, BigInteger> call() throws Exception {
                         List<Type> results = executeCallMultipleValueReturn(function);
                         return new Tuple4<Boolean, String, String, BigInteger>(
-                                (Boolean) results.get(0).getValue(),
-                                (String) results.get(1).getValue(),
-                                (String) results.get(2).getValue(),
+                                (Boolean) results.get(0).getValue(), 
+                                (String) results.get(1).getValue(), 
+                                (String) results.get(2).getValue(), 
                                 (BigInteger) results.get(3).getValue());
                     }
                 });
     }
 
     public RemoteFunctionCall<Tuple4<Boolean, String, String, BigInteger>> verifyEntity(String ontologyIri, String versionIri, BigInteger entityHash) {
-        final Function function = new Function(FUNC_VERIFYENTITY,
-                Arrays.<Type>asList(new org.web3j.abi.datatypes.Utf8String(ontologyIri),
-                        new org.web3j.abi.datatypes.Utf8String(versionIri),
-                        new org.web3j.abi.datatypes.generated.Int256(entityHash)),
+        final Function function = new Function(FUNC_VERIFYENTITY, 
+                Arrays.<Type>asList(new org.web3j.abi.datatypes.Utf8String(ontologyIri), 
+                new org.web3j.abi.datatypes.Utf8String(versionIri), 
+                new org.web3j.abi.datatypes.generated.Int256(entityHash)), 
                 Arrays.<TypeReference<?>>asList(new TypeReference<Bool>() {}, new TypeReference<Address>() {}, new TypeReference<Utf8String>() {}, new TypeReference<Uint256>() {}));
         return new RemoteFunctionCall<Tuple4<Boolean, String, String, BigInteger>>(function,
                 new Callable<Tuple4<Boolean, String, String, BigInteger>>() {
@@ -104,9 +104,9 @@ public class ChangeTracking extends Contract {
                     public Tuple4<Boolean, String, String, BigInteger> call() throws Exception {
                         List<Type> results = executeCallMultipleValueReturn(function);
                         return new Tuple4<Boolean, String, String, BigInteger>(
-                                (Boolean) results.get(0).getValue(),
-                                (String) results.get(1).getValue(),
-                                (String) results.get(2).getValue(),
+                                (Boolean) results.get(0).getValue(), 
+                                (String) results.get(1).getValue(), 
+                                (String) results.get(2).getValue(), 
                                 (BigInteger) results.get(3).getValue());
                     }
                 });
