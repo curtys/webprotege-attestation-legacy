@@ -38,3 +38,5 @@ nbproject/
 /bin
 /results
 *.owl
+*.rdf
+*.ttl

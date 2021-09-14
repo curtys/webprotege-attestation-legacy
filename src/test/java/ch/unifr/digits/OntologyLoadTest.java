@@ -1,25 +1,20 @@
 package ch.unifr.digits;
 
-import ch.unifr.digits.webprotege.attestation.server.FileAttestationService;
 import ch.unifr.digits.webprotege.attestation.server.OntologyAttestationService;
-import ch.unifr.digits.webprotege.attestation.shared.VerifyResult;
+import org.apache.jasper.tagplugins.jstl.core.Import;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.semanticweb.owlapi.model.IRI;
+import org.semanticweb.owlapi.model.OWLAnnotation;
+import org.semanticweb.owlapi.model.OWLAxiom;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.parameters.Imports;
-import org.semanticweb.owlapi.owlxml.renderer.OWLXMLObjectRenderer;
-import org.semanticweb.owlapi.owlxml.renderer.OWLXMLWriter;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 
-import java.io.StringWriter;
 import java.time.Duration;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static ch.unifr.digits.FileSupport.saveMeasurementsSeries;
 
@@ -35,52 +30,52 @@ public class OntologyLoadTest {
     private static final List<Runner> serviceRunners = new ArrayList<>();
 
     static {
-//        testOntologyFiles.put("doid", "ontologies/doid.owl");
-//        testOntologyFiles.put("enanomapper", "ontologies/enanomapper.owl");
-//        testOntologyFiles.put("foodon", "ontologies/foodon.owl");
-//        testOntologyFiles.put("hoom_orphanet", "ontologies/hoom_orphanet.owl");
-        testOntologyFiles.put("ncit", "ontologies/ncit-thesaurus.owl");
-//        testOntologyFiles.put("obi", "ontologies/obi.owl");
-//        testOntologyFiles.put("pato", "ontologies/pato.owl");
-//        testOntologyFiles.put("ro", "ontologies/ro.owl");
-//        testOntologyFiles.put("uberon", "ontologies/uberon.owl");
-//        testOntologyFiles.put("vto", "ontologies/vto.owl");
-//        testOntologyFiles.put("ordo", "ontologies/ordo_orphanet.owl");
+        testOntologyFiles.put("biomodels", "ontologies/biomodels-21.owl");
+        testOntologyFiles.put("dron", "ontologies/dron-full.owl");
+        testOntologyFiles.put("gexo", "ontologies/gexo.rdf");
+        testOntologyFiles.put("iobc", "ontologies/IOBC_1_4_0.ttl");
+        testOntologyFiles.put("rh-mesh", "ontologies/mesh.owl");
+        testOntologyFiles.put("ncit", "ontologies/ncit.owl");
+        testOntologyFiles.put("nifstd", "ontologies/nif.ttl");
+        testOntologyFiles.put("reto", "ontologies/reto.rdf");
+        testOntologyFiles.put("rexo", "ontologies/rexo.rdf");
+        testOntologyFiles.put("upheno", "ontologies/upheno.owl");
 
-//        serviceRunners.add(new Runner.FileAttest(new FileAttestationService(), measurements, false));
-        serviceRunners.add(new Runner.OntologyAttest(new OntologyAttestationService(), measurements, false));
+        serviceRunners.add(new Runner.HashRunner(new OntologyAttestationService(), measurements));
+//        serviceRunners.add(new Runner.OntologyAttest(new OntologyAttestationService(), measurements, false));
     }
 
-    @BeforeAll
-    public static void beforeAll() throws Exception {
-        for (Map.Entry<String, String> entry : testOntologyFiles.entrySet()) {
-            OWLOntology owlOntology = FileSupport.loadOntologyFromResources(entry.getValue());
-            loadedOntologies.put(entry.getKey(), owlOntology);
-            int entities = owlOntology.getSignature(Imports.INCLUDED).size();
-            int classes = owlOntology.getClassesInSignature(Imports.INCLUDED).size();
-            System.out.println(entry.getKey() + "[numEntities="+ entities +"][numClasses=" + classes + "]");
-        }
-    }
+//    @BeforeAll
+//    public static void beforeAll() throws Exception {
+//        for (Map.Entry<String, String> entry : testOntologyFiles.entrySet()) {
+//            OWLOntology owlOntology = FileSupport.loadOntologyFromResources(entry.getValue());
+//            loadedOntologies.put(entry.getKey(), owlOntology);
+//            int entities = owlOntology.getSignature(Imports.INCLUDED).size();
+//            int classes = owlOntology.getClassesInSignature(Imports.INCLUDED).size();
+//            System.out.println(entry.getKey() + "[numEntities="+ entities +"][numClasses=" + classes + "]");
+//        }
+//    }
 
     @Test
     public void batch() throws Exception {
 
-        for (Map.Entry<String, OWLOntology> entry : loadedOntologies.entrySet()) {
+        for (Map.Entry<String, String> entry : testOntologyFiles.entrySet()) {
+            OWLOntology owlOntology = loadOntology(entry.getKey(), entry.getValue());
             for (Runner runner : serviceRunners) {
                 for (int i = 0; i < NUM_RUNS; i++) {
-                    runner.attest(entry.getKey(), entry.getValue());
-//                    runner.verify(entry.getKey(), entry.getValue());
+                    runner.execute(entry.getKey(), owlOntology);
                 }
-                saveMeasurementsSeries(RESULTS_DIR+runner.name()+"-attest.csv", entry.getKey(),
-                        measurements.getSeries(constructSeriesName(entry.getKey(), runner.name(), "attest"))
-                                .stream().map(Duration::toNanos).map(String::valueOf), NUM_RUNS);
-                saveMeasurementsSeries(RESULTS_DIR+runner.name()+"-hash.csv", entry.getKey(),
+                saveMeasurementsSeries(RESULTS_DIR+runner.name()+".csv", entry.getKey(),
                         measurements.getSeries(constructSeriesName(entry.getKey(), runner.name(), "hash"))
                                 .stream().map(Duration::toNanos).map(String::valueOf), NUM_RUNS);
-                saveMeasurementsSeries(RESULTS_DIR+runner.name()+"-gas.csv", entry.getKey(),
-                        measurements.getManualSeries(constructSeriesName(entry.getKey(), runner.name(), "gas"))
-                                .stream().map(String::valueOf), NUM_RUNS);
+//                saveMeasurementsSeries(RESULTS_DIR+runner.name()+"-attest.csv", entry.getKey(),
+//                        measurements.getSeries(constructSeriesName(entry.getKey(), runner.name(), "attest"))
+//                                .stream().map(Duration::toNanos).map(String::valueOf), NUM_RUNS);
+//                saveMeasurementsSeries(RESULTS_DIR+runner.name()+"-gas.csv", entry.getKey(),
+//                        measurements.getManualSeries(constructSeriesName(entry.getKey(), runner.name(), "gas"))
+//                                .stream().map(String::valueOf), NUM_RUNS);
             }
+            System.gc();
         }
 
     }
@@ -89,65 +84,20 @@ public class OntologyLoadTest {
         return id + "-" + serviceName + "-" + tag;
     }
 
+    private static OWLOntology loadOntology(String key, String path) throws Exception {
+        OWLOntology owlOntology = FileSupport.loadOntologyFromResources(path);
+        int signature = owlOntology.getSignature(Imports.INCLUDED).size();
+        int classes = owlOntology.getClassesInSignature(Imports.INCLUDED).size();
+        int axioms = owlOntology.getAxioms(Imports.INCLUDED).size();
+        int annotations = owlOntology.getAnnotations().size();
+        int all = signature+annotations+axioms;
+        System.out.println(key + "[numAxioms="+ axioms +"][numAnnotations="+ annotations +"][numSignature="+ signature +"][numClasses=" + classes + "][numEntities=" + all + "]");
+        return owlOntology;
+    }
+
     private interface Runner {
-        void attest(String id, OWLOntology ontology) throws Exception;
-        void verify(String id, OWLOntology ontology) throws Exception;
+        void execute(String id, OWLOntology ontology) throws Exception;
         String name();
-
-        class FileAttest implements Runner {
-
-            private final FileAttestationService service;
-            private final Measurements measurements;
-            private final boolean skipBlc;
-
-            FileAttest(FileAttestationService service, Measurements measurements, boolean skipBlc) {
-                this.service = service;
-                this.measurements = measurements;
-                this.skipBlc = skipBlc;
-            }
-
-            @Override
-            public void attest(String id, OWLOntology ontology) throws Exception {
-                String iri = ontology.getOntologyID().getOntologyIRI().get().toString();
-                String versionIri = ontology.getOntologyID().getVersionIRI().or(IRI.create("")).toString();
-                String document = documentString(ontology);
-                int ticket = measurements.begin();
-                String hash = service.hashFile(document.getBytes());
-                measurements.finish(constructSeriesName(id, name(), "hash"), ticket);
-                if (skipBlc) return;
-                System.out.println("attest " + name() + " " + iri + " " + versionIri + " " + hash);
-
-                ticket = measurements.begin();
-                service.attest(iri, versionIri, "John doe", hash, null);
-                measurements.finish(constructSeriesName(id, name(), "attest"), ticket);
-            }
-
-            @Override
-            public void verify(String id, OWLOntology ontology) throws Exception {
-                String iri = ontology.getOntologyID().getOntologyIRI().get().toString();
-                String versionIri = ontology.getOntologyID().getVersionIRI().or(IRI.create("")).toString();
-                String document = documentString(ontology);
-                String hash = service.hashFile(document.getBytes());
-                System.out.println("verify " + name() + " " + iri + " " + versionIri + " " + hash);
-
-                int ticket = measurements.begin();
-                service.verify(iri, versionIri, hash, null);
-                measurements.finish(constructSeriesName(id, name(), "verify"), ticket);
-            }
-
-            @Override
-            public String name() {
-                return service.getClass().getSimpleName().toLowerCase();
-            }
-
-            private String documentString(OWLOntology ontology) {
-                StringWriter base = new StringWriter();
-                OWLXMLWriter writer = new OWLXMLWriter(base, ontology);
-                OWLXMLObjectRenderer renderer = new OWLXMLObjectRenderer(writer);
-                renderer.visit(ontology);
-                return base.toString();
-            }
-        }
 
         class OntologyAttest implements Runner {
 
@@ -162,7 +112,7 @@ public class OntologyLoadTest {
             }
 
             @Override
-            public void attest(String id, OWLOntology ontology) throws Exception {
+            public void execute(String id, OWLOntology ontology) throws Exception {
                 String iri = ontology.getOntologyID().getOntologyIRI().get().toString();
                 String versionIri = ontology.getOntologyID().getVersionIRI().or(IRI.create("")).toString();
                 int ticket = measurements.begin();
@@ -181,21 +131,33 @@ public class OntologyLoadTest {
             }
 
             @Override
-            public void verify(String id, OWLOntology ontology) throws Exception {
-                String iri = ontology.getOntologyID().getOntologyIRI().get().toString();
-                String versionIri = ontology.getOntologyID().getVersionIRI().or(IRI.create("")).toString();
-                String ontologyHash = service.ontologyHash(ontology);
-                System.out.println("verify " + name() + " " + iri + " " + versionIri + " " + ontologyHash);
+            public String name() {
+                return service.getClass().getSimpleName().toLowerCase();
+            }
+        }
 
+        class HashRunner implements Runner {
+
+            private final OntologyAttestationService service;
+            private final Measurements measurements;
+
+            HashRunner(OntologyAttestationService service, Measurements measurements) {
+                this.service = service;
+                this.measurements = measurements;
+            }
+
+            @Override
+            public void execute(String id, OWLOntology ontology) throws Exception {
+//                String iri = ontology.getOntologyID().getOntologyIRI().get().toString();
+//                String versionIri = ontology.getOntologyID().getVersionIRI().or(IRI.create("")).toString();
                 int ticket = measurements.begin();
-                VerifyResult verifyResult = service.verify(iri, versionIri, ontologyHash, null);
-                measurements.finish(constructSeriesName(id, name(), "verify"), ticket);
-                System.out.println(verifyResult.toString());
+                String ontologyHash = service.ontologyHash(ontology);
+                measurements.finish(constructSeriesName(id, name(), "hash"), ticket);
             }
 
             @Override
             public String name() {
-                return service.getClass().getSimpleName().toLowerCase();
+                return "hashing";
             }
         }
     }

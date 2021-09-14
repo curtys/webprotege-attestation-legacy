@@ -19,19 +19,13 @@ public class OntologyAttestationService<T> extends FileAttestationService<T> {
 
     public String ontologyHash(OWLOntology ontology) {
         Set<OWLEntity> signature = ontology.getSignature(Imports.INCLUDED);
-        Set<OWLAxiom> axioms = ontology.getAxioms();
+        Set<OWLAxiom> axioms = ontology.getAxioms(Imports.INCLUDED);
         Set<OWLAnnotation> annotations = ontology.getAnnotations();
         Set<OWLObject> all = new HashSet<>();
         all.addAll(signature);
         all.addAll(annotations);
         all.addAll(axioms);
-        return String.valueOf(all.hashCode());
-    }
-
-    public int entitySetHash(OWLOntology ontology) {
-        Set<OWLClass> classesInSignature = ontology.getClassesInSignature();
-        Set<Integer> entitySetHashes = classesInSignature.stream().map(this::entityHash).collect(Collectors.toSet());
-        return entitySetHashes.hashCode();
+        return HashStringUtils.boundedHex(all.hashCode());
     }
 
     public int entityHash(OWLEntity entity) {
