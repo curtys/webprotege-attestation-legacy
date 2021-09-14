@@ -1,6 +1,11 @@
 ## Ontology attestation and verification module for WebProtégé
 
 A module for WebProtégé, implementing an approach for ontology attestation. Intended to be used with https://github.com/curtys/webprotege-attestation-base/.
+
+## Datasets
+* [ISWC21](dataset/ISWC21)
+* [KCAP21](dataset/KCAP21)
+
 ## Requirements
 * solc 7.1.0
 * web3j-cli
