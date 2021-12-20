@@ -1,3 +1,7 @@
+# Deprecated
+
+This module has been moved to https://github.com/curtys/webprotege-attestation
+
 ## Ontology attestation and verification module for WebProtégé
 
 A module for WebProtégé, implementing an approach for ontology attestation. Intended to be used with https://github.com/curtys/webprotege-attestation-base/.
